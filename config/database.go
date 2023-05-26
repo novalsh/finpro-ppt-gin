@@ -7,8 +7,6 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-
-	"finpro/models"
 )
 
 func SetupDatabaseConnection() *gorm.DB {
@@ -28,8 +26,7 @@ func SetupDatabaseConnection() *gorm.DB {
 	if err != nil {
 		panic("Failed to create a connection to database")
 	}
-
-	db.AutoMigrate(&models.User{}, &models.Todo{}, &models.Step{}, &models.Category{})
+	fmt.Println("Database connected successfully")
 
 	return db
 }
