@@ -1,4 +1,4 @@
-module example/finpro-ppt-gin
+module finpro
 
 go 1.20
 

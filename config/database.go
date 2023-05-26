@@ -3,11 +3,12 @@ package config
 import (
 	"fmt"
 	"os"
-	"FINPRO-PPT-GIN/models"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+
+	"finpro/models"
 )
 
 func SetupDatabaseConnection() *gorm.DB {
