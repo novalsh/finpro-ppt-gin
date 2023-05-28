@@ -11,8 +11,8 @@ import (
 )
 
 type StepService interface {
-	InsertStep(b dto.TodoCreateDto) models.Step
-	UpdateStep(b dto.TodoUpdateDto) models.Step
+	InsertStep(b dto.StepCreateDto) models.Step
+	UpdateStep(b dto.StepUpdateDto) models.Step
 	DeleteStep(b models.Step)
 	FindAllStepAll() []models.Step
 	FindStepById(stepID uint64) models.Step
@@ -28,7 +28,7 @@ func NewStepService(stepRepo repository.StepRepository) StepService {
 	}
 }
 
-func (service *stepService) InsertStep(b dto.TodoCreateDto) models.Step {
+func (service *stepService) InsertStep(b dto.StepCreateDto) models.Step {
 	step := models.Step{}
 	err := smapping.FillStruct(&step, smapping.MapFields(&b))
 	if err != nil {
@@ -38,7 +38,7 @@ func (service *stepService) InsertStep(b dto.TodoCreateDto) models.Step {
 	return res
 }
 
-func (service *stepService) UpdateStep(b dto.TodoUpdateDto) models.Step {
+func (service *stepService) UpdateStep(b dto.StepUpdateDto) models.Step {
 	step := models.Step{}
 	err := smapping.FillStruct(&step, smapping.MapFields(&b))
 	if err != nil {
