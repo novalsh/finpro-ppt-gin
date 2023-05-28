@@ -28,8 +28,8 @@ func (db *stepConnection) InsertStep(b models.Step) models.Step {
 	db.connection.Save(&b)
 	db.connection.Preload("TodoId").Find(&b)
 	return b
-
 }
+
 func (db *stepConnection) UpdateStep(b models.Step) models.Step {
 	db.connection.Save(&b)
 	db.connection.Preload("TodoId").Find(&b)
