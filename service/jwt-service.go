@@ -8,7 +8,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-// JWTService is a contract of what jwtservice can do
 type JWTService interface {
 	GenerateToken(userID string) string
 	ValidateToken(token string) (*jwt.Token, error)

@@ -11,7 +11,7 @@ type User struct {
 	Password      string    `gorm:"type:varchar(255):not null" json:"password"`
 	UserPronounce string    `gorm:"type:varchar(255):not null" json:"user_pronounce"`
 	UserPhone     string    `gorm:"type:varchar(255):not null" json:"user_phone"`
-	UserToken     string    `gorm:"type:varchar(255):not null" json:"user_token"`
+	UserToken     string    `gorm:"type:varchar(255)" json:"user_token"`
 	CreatedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
