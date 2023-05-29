@@ -10,9 +10,9 @@ import (
 )
 
 type UserRepository interface {
-	InsertUser(username string, password string, email string) models.User
-	UpdateUser(userId uint64, username string, password string, email string) models.User
-	VerifyCredential(username string, password string) interface{}
+	InsertUser(user models.User) models.User
+	UpdateUser(user models.User) models.User
+	VerifyCredential(email string, password string) interface{}
 	IsDuplicateEmail(email string) (tx *gorm.DB)
 	FindByEmail(email string) models.User
 	ProfileUser(userId string) models.User
@@ -28,25 +28,27 @@ func NewUserRepository(dbConn *gorm.DB) UserRepository {
 	}
 }
 
-func (db *userConnection) InsertUser(username string, password string, email string) models.User {
-	user := models.User{UserName: username, Password: password, UserGmail: email}
+func (db *userConnection) InsertUser(user models.User) models.User {
+	user.Password = hashAndSalt([]byte(user.Password))
 	db.connection.Save(&user)
 	return user
 }
 
-func (db *userConnection) UpdateUser(userId uint64, username string, password string, email string) models.User {
-	var user models.User
-	db.connection.Find(&user, userId)
-	user.UserName = username
-	user.Password = password
-	user.UserGmail = email
+func (db *userConnection) UpdateUser(user models.User) models.User {
+	if user.Password != "" {
+		user.Password = hashAndSalt([]byte(user.Password))
+	} else {
+		var tempUser models.User
+		db.connection.Find(&tempUser, user.UserId)
+		user.Password = tempUser.Password
+	}
 	db.connection.Save(&user)
 	return user
 }
 
 func (db *userConnection) VerifyCredential(username string, password string) interface{} {
 	var user models.User
-	res := db.connection.Where("user_name = ? AND password = ?", username, password).Find(&user)
+	res := db.connection.Where("user_gmail = ?", username).Take(&user)
 	if res.Error == nil {
 		return user
 	}
@@ -70,11 +72,11 @@ func (db *userConnection) ProfileUser(userId string) models.User {
 	return user
 }
 
-func hashAndSalt(pwd string) string {
-	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.MinCost)
+func hashAndSalt(pwd []byte) string {
+	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
 	if err != nil {
 		log.Println(err)
-		panic("Failed to hash a password")
+		panic("Failed to has a password")
 	}
 	return string(hash)
 }
