@@ -34,7 +34,7 @@ func (service *categoryService) InsertCategory(b dto.CategoryCreateDto) models.C
 	if err != nil {
 		log.Fatalf("Failed map %v: ", err)
 	}
-	res := service.categoryRepository.InsertCategory(category.CategoryName) // Menggunakan category.CategoryName sebagai argumen
+	res := service.categoryRepository.InsertCategory(category)
 	return res
 }
 
@@ -44,13 +44,12 @@ func (service *categoryService) UpdateCategory(b dto.CategoryUpdateDto) models.C
 	if err != nil {
 		log.Fatalf("Failed map %v: ", err)
 	}
-	res := service.categoryRepository.UpdateCategory(b.CategoryId, category.CategoryName) // Menggunakan ID dan nama kategori yang sesuai
+	res := service.categoryRepository.UpdateCategory(category)
 	return res
 }
 
 func (service *categoryService) DeleteCategory(b models.Category) {
-	categoryID := b.CategoryId                            // Mengambil ID kategori dari variabel b
-	service.categoryRepository.DeleteCategory(categoryID) // Menghapus kategori berdasarkan ID
+	service.categoryRepository.DeleteCategory(b)
 }
 
 func (service *categoryService) FindAllCategory() []models.Category {
