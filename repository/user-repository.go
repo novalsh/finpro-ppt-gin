@@ -12,9 +12,9 @@ import (
 type UserRepository interface {
 	InsertUser(user models.User) models.User
 	UpdateUser(user models.User) models.User
-	VerifyCredential(email string, password string) interface{}
-	IsDuplicateEmail(email string) (tx *gorm.DB)
-	FindByEmail(email string) models.User
+	VerifyCredential(UserGmail string, password string) interface{}
+	IsDuplicateEmail(UserGmail string) (tx *gorm.DB)
+	FindByEmail(UserGmail string) models.User
 	ProfileUser(userId string) models.User
 }
 
@@ -55,14 +55,14 @@ func (db *userConnection) VerifyCredential(username string, password string) int
 	return nil
 }
 
-func (db *userConnection) IsDuplicateEmail(email string) (tx *gorm.DB) {
+func (db *userConnection) IsDuplicateEmail(UserGmail string) (tx *gorm.DB) {
 	var user models.User
-	return db.connection.Where("user_gmail = ?", email).Take(&user)
+	return db.connection.Where("user_gmail = ?", UserGmail).Take(&user)
 }
 
-func (db *userConnection) FindByEmail(email string) models.User {
+func (db *userConnection) FindByEmail(UserGmail string) models.User {
 	var user models.User
-	db.connection.Find(&user, "user_gmail = ?", email)
+	db.connection.Find(&user, "user_gmail = ?", UserGmail)
 	return user
 }
 
