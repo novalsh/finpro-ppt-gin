@@ -32,7 +32,6 @@ func SetupDatabaseConnection() *gorm.DB {
 }
 
 func CloseDatabaseConnection(db *gorm.DB) {
-
 	dbSQL, err := db.DB()
 	if err != nil {
 		panic("Failed to close connection from database")

@@ -12,10 +12,10 @@ import (
 type UserRepository interface {
 	InsertUser(user models.User) models.User
 	UpdateUser(user models.User) models.User
-	VerifyCredential(UserGmail string, password string) interface{}
-	IsDuplicateEmail(UserGmail string) (tx *gorm.DB)
-	FindByEmail(UserGmail string) models.User
-	ProfileUser(userId string) models.User
+	VerifyCredential(Email string, password string) interface{}
+	IsDuplicateEmail(Email string) (tx *gorm.DB)
+	FindByEmail(Email string) models.User
+	ProfileUser(ID string) models.User
 }
 
 type userConnection struct {
@@ -39,7 +39,7 @@ func (db *userConnection) UpdateUser(user models.User) models.User {
 		user.Password = hashAndSalt([]byte(user.Password))
 	} else {
 		var tempUser models.User
-		db.connection.Find(&tempUser, user.UserId)
+		db.connection.Find(&tempUser, user.ID)
 		user.Password = tempUser.Password
 	}
 	db.connection.Save(&user)
@@ -48,27 +48,27 @@ func (db *userConnection) UpdateUser(user models.User) models.User {
 
 func (db *userConnection) VerifyCredential(username string, password string) interface{} {
 	var user models.User
-	res := db.connection.Where("user_gmail = ?", username).Take(&user)
+	res := db.connection.Where("email = ?", username).Take(&user)
 	if res.Error == nil {
 		return user
 	}
 	return nil
 }
 
-func (db *userConnection) IsDuplicateEmail(UserGmail string) (tx *gorm.DB) {
+func (db *userConnection) IsDuplicateEmail(Email string) (tx *gorm.DB) {
 	var user models.User
-	return db.connection.Where("user_gmail = ?", UserGmail).Take(&user)
+	return db.connection.Where("email = ?", Email).Take(&user)
 }
 
-func (db *userConnection) FindByEmail(UserGmail string) models.User {
+func (db *userConnection) FindByEmail(Email string) models.User {
 	var user models.User
-	db.connection.Find(&user, "user_gmail = ?", UserGmail)
+	db.connection.Find(&user, "email = ?", Email)
 	return user
 }
 
-func (db *userConnection) ProfileUser(userId string) models.User {
+func (db *userConnection) ProfileUser(ID string) models.User {
 	var user models.User
-	db.connection.Find(&user, "user_id = ?", userId)
+	db.connection.Find(&user, "user_id = ?", ID)
 	return user
 }
 

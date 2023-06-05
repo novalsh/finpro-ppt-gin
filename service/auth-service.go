@@ -3,7 +3,6 @@ package service
 import (
 	"log"
 
-	"github.com/mashingan/smapping"
 	"golang.org/x/crypto/bcrypt"
 
 	"finpro/dto"
@@ -12,9 +11,10 @@ import (
 )
 
 type AuthService interface {
-	VerifyCredential(UserGmail string, password string) interface{}
+	VerifyCredential(Email string, password string) interface{}
 	CreateUser(user dto.RegisterDTO) models.User
-	FindByEmail(UserGmail string) models.User
+	FindByEmail(Email string) models.User
+	IsDuplicateEmail(Email string) bool
 }
 
 type authService struct {
@@ -27,11 +27,11 @@ func NewAuthService(userRep repository.UserRepository) AuthService {
 	}
 }
 
-func (service *authService) VerifyCredential(UserGmail string, password string) interface{} {
-	res := service.userRepoistory.VerifyCredential(UserGmail, password)
+func (service *authService) VerifyCredential(Email string, password string) interface{} {
+	res := service.userRepoistory.VerifyCredential(Email, password)
 	if v, ok := res.(models.User); ok {
 		comparedPassword := comparePassword(v.Password, []byte(password))
-		if v.UserGmail == UserGmail && comparedPassword {
+		if v.Email == Email && comparedPassword {
 			return res
 		}
 		return false
@@ -41,16 +41,23 @@ func (service *authService) VerifyCredential(UserGmail string, password string) 
 
 func (service *authService) CreateUser(user dto.RegisterDTO) models.User {
 	userToCreate := models.User{}
-	err := smapping.FillStruct(&userToCreate, smapping.MapFields(&user))
-	if err != nil {
-		log.Fatalf("Failed map %v: ", err)
-	}
-	res := service.userRepoistory.InsertUser(userToCreate)
-	return res
+	userToCreate.Name = user.Name
+	userToCreate.Email = user.Email
+	userToCreate.Phone = user.Phone
+	userToCreate.Password = user.Password
+
+	InsertToDB := service.userRepoistory.InsertUser(userToCreate)
+
+	return InsertToDB
 }
 
-func (service *authService) FindByEmail(UserGmail string) models.User {
-	return service.userRepoistory.FindByEmail(UserGmail)
+func (service *authService) FindByEmail(Email string) models.User {
+	return service.userRepoistory.FindByEmail(Email)
+}
+
+func (service *authService) IsDuplicateEmail(Email string) bool {
+	res := service.userRepoistory.IsDuplicateEmail(Email)
+	return !(res.Error == nil)
 }
 
 func comparePassword(hashedPwd string, plainPassword []byte) bool {

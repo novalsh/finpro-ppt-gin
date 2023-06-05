@@ -22,7 +22,7 @@ type categoryService struct {
 	categoryRepository repository.CategoryRepository
 }
 
-func NewCategory(cateRepo repository.CategoryRepository) CategoryService {
+func NewCategoryService(cateRepo repository.CategoryRepository) CategoryService {
 	return &categoryService{
 		categoryRepository: cateRepo,
 	}

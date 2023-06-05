@@ -3,15 +3,12 @@ package models
 import "time"
 
 type User struct {
-	UserId        uint64    `gorm:"primary_key:auto_increment" json:"user_id"`
-	UserName      string    `gorm:"type:varchar(255):not null" json:"user_name"`
-	UserGmail     string    `gorm:"type:varchar(255):not null" json:"user_gmail"`
-	UserGoogleId  string    `gorm:"type:varchar(255):not null" json:"user_google_id"`
-	UserPicture   string    `gorm:"type:varchar(255):not null" json:"user_picture"`
-	Password      string    `gorm:"type:varchar(255):not null" json:"password"`
-	UserPronounce string    `gorm:"type:varchar(255):not null" json:"user_pronounce"`
-	UserPhone     string    `gorm:"type:varchar(255):not null" json:"user_phone"`
-	UserToken     string    `gorm:"type:varchar(255)" json:"user_token"`
-	CreatedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	ID        uint64    `gorm:"primary_key:auto_increment" json:"id"`
+	Name      string    `gorm:"column:name;type:varchar(128);not null" json:"name"`
+	Email     string    `gorm:"column:email;type:varchar(128);not null" json:"email"`
+	Phone     string    `gorm:"column:phone;type:varchar(64);not null" json:"phone"`
+	Password  string    `gorm:"column:password;type:varchar(256);not null" json:"password"`
+	Token     string    `gorm:"column:token;type:varchar(256)" json:"token"`
+	CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
 }

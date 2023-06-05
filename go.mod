@@ -7,7 +7,6 @@ require (
 	github.com/gin-gonic/gin v1.9.0
 	github.com/joho/godotenv v1.5.1
 	github.com/mashingan/smapping v0.1.19
-	github.com/pilu/fresh v0.0.0-20190826141211-0fa698148017
 	golang.org/x/crypto v0.5.0
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.1
@@ -22,19 +21,15 @@ require (
 	github.com/go-playground/validator/v10 v10.11.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/goccy/go-json v0.10.0 // indirect
-	github.com/howeyc/fsnotify v0.9.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
-	github.com/pilu/config v0.0.0-20131214182432-3eb99e6c0b9a // indirect
-	github.com/pilu/miniassert v0.0.0-20140522125902-bee63581261a // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
