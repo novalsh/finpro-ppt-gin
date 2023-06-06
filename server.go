@@ -23,6 +23,7 @@ var (
 	stepService        service.StepService           = service.NewStepService(stepRepository)
 	todoService        service.TodoService           = service.NewTodoService(todoRepostiory)
 	authController     controllers.AuthController    = controllers.NewAuthController(authService, jwtService)
+	todoController     controllers.TodoController    = controllers.NewTodoController(todoService, jwtService)
 )
 
 func main() {
@@ -33,6 +34,15 @@ func main() {
 	{
 		authRoutes.POST("/login", authController.Login)
 		authRoutes.POST("/register", authController.Register)
+	}
+
+	autRoutes := r.Group("todos")
+	{
+		autRoutes.GET("/", todoController.AllTodo)
+		autRoutes.GET("/:id", todoController.FindTodoById)
+		autRoutes.POST("/", todoController.InsertTodo)
+		autRoutes.PUT("/", todoController.UpdateTodo)
+		autRoutes.DELETE("/:id", todoController.DeleteTodo)
 	}
 
 	r.Run()

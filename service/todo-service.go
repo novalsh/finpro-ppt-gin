@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/mashingan/smapping"
@@ -12,10 +13,11 @@ import (
 
 type TodoService interface {
 	InsertTodo(b dto.TodoCreateDto) models.Todo
-	UpdateTodoById(b dto.TodoUpdateDto) models.Todo
-	DeleteTodoById(b models.Todo)
+	UpdateTodo(b dto.TodoUpdateDto) models.Todo
+	DeleteTodo(b models.Todo)
 	FindAllTodo() []models.Todo
 	FindTodoById(todoID uint64) models.Todo
+	IsAllowedToEdit(UserId string, ID uint64) bool
 }
 
 type todoService struct {
@@ -38,7 +40,7 @@ func (service *todoService) InsertTodo(b dto.TodoCreateDto) models.Todo {
 	return res
 }
 
-func (service *todoService) UpdateTodoById(b dto.TodoUpdateDto) models.Todo {
+func (service *todoService) UpdateTodo(b dto.TodoUpdateDto) models.Todo {
 	todo := models.Todo{}
 	err := smapping.FillStruct(&todo, smapping.MapFields(&b))
 	if err != nil {
@@ -48,7 +50,7 @@ func (service *todoService) UpdateTodoById(b dto.TodoUpdateDto) models.Todo {
 	return res
 }
 
-func (service *todoService) DeleteTodoById(b models.Todo) {
+func (service *todoService) DeleteTodo(b models.Todo) {
 	service.todoRepository.DeleteTodoById(b)
 }
 
@@ -58,4 +60,10 @@ func (service *todoService) FindAllTodo() []models.Todo {
 
 func (service *todoService) FindTodoById(todoID uint64) models.Todo {
 	return service.todoRepository.FindTodoById(todoID) // Mengambil todo berdasarkan ID
+}
+
+func (service *todoService) IsAllowedToEdit(userID string, todoID uint64) bool {
+	b := service.todoRepository.FindTodoById(todoID)
+	id := fmt.Sprintf("%v", b.UserId)
+	return userID == id
 }
