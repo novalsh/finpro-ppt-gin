@@ -139,5 +139,4 @@ func (c *todoController) GetUserIdByToken(token string) string {
 	claims := aToken.Claims.(jwt.MapClaims)
 	id := fmt.Sprintf("%v", claims["user_id"])
 	return id
-
 }

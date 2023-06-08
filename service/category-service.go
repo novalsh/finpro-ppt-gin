@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/mashingan/smapping"
@@ -16,6 +17,7 @@ type CategoryService interface {
 	DeleteCategory(b models.Category)
 	FindAllCategory() []models.Category
 	FindCategoryById(categoryID uint64) models.Category
+	IsAllowedToEdit(CategoryId string, Id uint64) bool
 }
 
 type categoryService struct {
@@ -40,10 +42,8 @@ func (service *categoryService) InsertCategory(b dto.CategoryCreateDto) models.C
 
 func (service *categoryService) UpdateCategory(b dto.CategoryUpdateDto) models.Category {
 	category := models.Category{}
-	err := smapping.FillStruct(&category, smapping.MapFields(&b))
-	if err != nil {
-		log.Fatalf("Failed map %v: ", err)
-	}
+	category.Id = b.Id
+	category.Name = b.Name
 	res := service.categoryRepository.UpdateCategory(category)
 	return res
 }
@@ -58,4 +58,10 @@ func (service *categoryService) FindAllCategory() []models.Category {
 
 func (service *categoryService) FindCategoryById(categoryID uint64) models.Category {
 	return service.categoryRepository.FindCategoryById(categoryID) // Mengambil kategori berdasarkan ID
+}
+
+func (service *categoryService) IsAllowedToEdit(Id string, CategoryId uint64) bool {
+	b := service.categoryRepository.FindCategoryById(CategoryId)
+	id := fmt.Sprintf("%v", b.Id)
+	return Id == id
 }
