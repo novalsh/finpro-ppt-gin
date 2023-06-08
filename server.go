@@ -24,7 +24,7 @@ var (
 	stepService        service.StepService            = service.NewStepService(stepRepository)
 	todoService        service.TodoService            = service.NewTodoService(todoRepostiory)
 	authController     controllers.AuthController     = controllers.NewAuthController(authService, jwtService)
-	todoController     controllers.TodoController     = controllers.NewTodoController(todoService, jwtService)
+	todoController     controllers.TodoController     = controllers.NewTodoController(todoService)
 	categoryController controllers.CategoryController = controllers.NewCategoryController(categoryService, jwtService)
 	userController     controllers.UserController     = controllers.NewUserController(userService, jwtService)
 )
@@ -46,7 +46,7 @@ func main() {
 
 		autRoutes := r.Group("todos", middleware.AuthorizeJWT(jwtService))
 		{
-			autRoutes.GET("/", todoController.AllTodo)
+			autRoutes.GET("/", todoController.FindAllTodo)
 			autRoutes.GET("/:id", todoController.FindTodoById)
 			autRoutes.POST("/", todoController.InsertTodo)
 			autRoutes.PUT("/", todoController.UpdateTodo)

@@ -1,16 +1,12 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 
 	"finpro/dto"
-	"finpro/helper"
-	"finpro/models"
 	"finpro/service"
 )
 
@@ -18,125 +14,88 @@ type TodoController interface {
 	InsertTodo(ctx *gin.Context)
 	UpdateTodo(ctx *gin.Context)
 	DeleteTodo(ctx *gin.Context)
-	AllTodo(ctx *gin.Context)
+	FindAllTodo(ctx *gin.Context)
 	FindTodoById(ctx *gin.Context)
-	GetUserIdByToken(token string) string
 }
 
 type todoController struct {
 	todoService service.TodoService
-	jwtService  service.JWTService
 }
 
-func NewTodoController(todoServ service.TodoService, jwtService service.JWTService) TodoController {
+func NewTodoController(todoServ service.TodoService) TodoController {
 	return &todoController{
 		todoService: todoServ,
-		jwtService:  jwtService,
 	}
 }
 
-func (c *todoController) InsertTodo(ctx *gin.Context) {
+func (controller *todoController) InsertTodo(ctx *gin.Context) {
 	var todoCreateDto dto.TodoCreateDto
-	errDTO := ctx.ShouldBind(&todoCreateDto)
-	if errDTO != nil {
-		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
-		ctx.JSON(http.StatusBadRequest, res)
-	} else {
-		authHeader := ctx.GetHeader("Authorization")
-		userId := c.GetUserIdByToken(authHeader)
-		convertedUserId, err := strconv.ParseUint(userId, 10, 64)
-		if err == nil {
-			todoCreateDto.UserId = convertedUserId
-		}
-		result := c.todoService.InsertTodo(todoCreateDto)
-		response := helper.BuildResponse(true, "OK!", result)
-		ctx.JSON(http.StatusCreated, response)
-	}
-}
-
-func (c *todoController) UpdateTodo(ctx *gin.Context) {
-	var TodoUpdateDto dto.TodoUpdateDto
-	errDTO := ctx.ShouldBind(&TodoUpdateDto)
-	if errDTO != nil {
-		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
-		ctx.JSON(http.StatusBadRequest, res)
-	}
-	authHeader := ctx.GetHeader("Authorization")
-	token, errToken := c.jwtService.ValidateToken(authHeader)
-	if errToken != nil {
-		panic(errToken.Error())
-	}
-	claims := token.Claims.(jwt.MapClaims)
-	id := fmt.Sprintf("%v", claims["user_id"])
-
-	if c.todoService.IsAllowedToEdit(id, TodoUpdateDto.Id) {
-		id, errID := strconv.ParseUint(id, 10, 64)
-		if errID == nil {
-			TodoUpdateDto.UserId = id
-		}
-		result := c.todoService.UpdateTodo(TodoUpdateDto)
-		response := helper.BuildResponse(true, "OK!", result)
-		ctx.JSON(http.StatusOK, response)
-	} else {
-		response := helper.BuildErrorResponse("You don't have permission to edit this todo", "You are not the owner", helper.EmptyObj{})
-		ctx.JSON(http.StatusForbidden, response)
-	}
-}
-
-func (c *todoController) DeleteTodo(ctx *gin.Context) {
-	var todo models.Todo
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	err := ctx.ShouldBindJSON(&todoCreateDto)
 	if err != nil {
-		response := helper.BuildErrorResponse("Failed to get id", "No param id were found", helper.EmptyObj{})
-		ctx.JSON(http.StatusBadRequest, response)
-	}
-	todo.ID = id
-	authHeader := ctx.GetHeader("Authorization")
-	token, errToken := c.jwtService.ValidateToken(authHeader)
-	if errToken != nil {
-		panic(errToken.Error())
-	}
-	claims := token.Claims.(jwt.MapClaims)
-	userId := fmt.Sprintf("%v", claims["user_id"])
-	if c.todoService.IsAllowedToEdit(userId, todo.ID) {
-		c.todoService.DeleteTodo(todo)
-		res := helper.BuildResponse(true, "Deleted", helper.EmptyObj{})
-		ctx.JSON(http.StatusOK, res)
-	} else {
-		response := helper.BuildErrorResponse("You don't have permission to delete this todo", "You are not the owner", helper.EmptyObj{})
-		ctx.JSON(http.StatusForbidden, response)
-	}
-}
-
-func (c *todoController) AllTodo(ctx *gin.Context) {
-	var todos []models.Todo = c.todoService.FindAllTodo()
-	res := helper.BuildResponse(true, "OK!", todos)
-	ctx.JSON(http.StatusOK, res)
-}
-
-func (c *todoController) FindTodoById(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
-	if err != nil {
-		res := helper.BuildErrorResponse("Failed to get id", "No param id were found", helper.EmptyObj{})
-		ctx.JSON(http.StatusBadRequest, res)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var todo models.Todo = c.todoService.FindTodoById(id)
-	if (todo == models.Todo{}) {
-		res := helper.BuildErrorResponse("Data not found", "No data with given id", helper.EmptyObj{})
-		ctx.JSON(http.StatusNotFound, res)
-	} else {
-		res := helper.BuildResponse(true, "OK!", todo)
-		ctx.JSON(http.StatusOK, res)
-	}
+
+	// Panggil service untuk menyimpan todo
+	createdTodo := controller.todoService.InsertTodo(todoCreateDto)
+
+	ctx.JSON(http.StatusOK, createdTodo)
 }
 
-func (c *todoController) GetUserIdByToken(token string) string {
-	aToken, err := c.jwtService.ValidateToken(token)
+func (controller *todoController) UpdateTodo(ctx *gin.Context) {
+	var todoUpdateDto dto.TodoUpdateDto
+	err := ctx.ShouldBindJSON(&todoUpdateDto)
 	if err != nil {
-		panic(err.Error())
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
-	claims := aToken.Claims.(jwt.MapClaims)
-	id := fmt.Sprintf("%v", claims["user_id"])
-	return id
+
+	// Panggil service untuk mengupdate todo
+	updatedTodo := controller.todoService.UpdateTodo(todoUpdateDto)
+
+	ctx.JSON(http.StatusOK, updatedTodo)
+}
+
+func (controller *todoController) DeleteTodo(ctx *gin.Context) {
+	// Ambil ID todo dari parameter URL
+	TodoID := ctx.Param("id")
+
+	// Konversi TodoID menjadi uint64
+	todoIDUint, err := strconv.ParseUint(TodoID, 10, 64)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid todo ID"})
+		return
+	}
+
+	// Panggil service untuk menghapus todo
+	err = controller.todoService.DeleteTodoById(todoIDUint)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Todo deleted successfully"})
+}
+
+func (controller *todoController) FindAllTodo(ctx *gin.Context) {
+	// Panggil service untuk mendapatkan daftar semua todo
+	todos := controller.todoService.FindAllTodo()
+
+	ctx.JSON(http.StatusOK, todos)
+}
+
+func (controller *todoController) FindTodoById(ctx *gin.Context) {
+	// Ambil ID todo dari parameter URL
+	todoId := ctx.Param("id")
+
+	TodoId, err := strconv.ParseUint(todoId, 10, 64)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Panggil service untuk mendapatkan todo berdasarkan ID
+	todo := controller.todoService.FindTodoById(TodoId)
+
+	ctx.JSON(http.StatusOK, gin.H{"todo": todo})
 }
