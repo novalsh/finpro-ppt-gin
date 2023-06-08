@@ -68,7 +68,7 @@ func (db *userConnection) FindByEmail(Email string) models.User {
 
 func (db *userConnection) ProfileUser(ID string) models.User {
 	var user models.User
-	db.connection.Find(&user, "user_id = ?", ID)
+	db.connection.Find(&user, "id = ?", ID)
 	return user
 }
 

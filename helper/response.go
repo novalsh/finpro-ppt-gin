@@ -15,6 +15,7 @@ func BuildResponse(status bool, message string, data interface{}) Response {
 	res := Response{
 		Status:  status,
 		Message: message,
+		Errors:  nil,
 		Data:    data,
 	}
 

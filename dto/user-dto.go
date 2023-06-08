@@ -1,8 +1,8 @@
 package dto
 
 type UserUpdateDTO struct {
-	UserId    uint64 `json:"user_id" form:"user_id" binding:"required"`
-	UserName  string `json:"user_name" form:"user_name" binding:"required"`
-	UserGmail string `json:"user_gmail" form:"user_gmail" binding:"required"`
-	Password  string `json:"password" form:"password" binding:"required"`
+	Id       uint64 `json:"id" form:"user_id" binding:"required"`
+	Name     string `json:"name" form:"user_name" binding:"required"`
+	Email    string `json:"email" form:"user_gmail" binding:"required"`
+	Password string `json:"password" form:"password" binding:"required"`
 }

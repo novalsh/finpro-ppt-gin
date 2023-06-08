@@ -6,6 +6,7 @@ import (
 
 	"finpro/config"
 	"finpro/controllers"
+	"finpro/middleware"
 	"finpro/repository"
 	"finpro/service"
 )
@@ -25,35 +26,42 @@ var (
 	authController     controllers.AuthController     = controllers.NewAuthController(authService, jwtService)
 	todoController     controllers.TodoController     = controllers.NewTodoController(todoService, jwtService)
 	categoryController controllers.CategoryController = controllers.NewCategoryController(categoryService, jwtService)
+	userController     controllers.UserController     = controllers.NewUserController(userService, jwtService)
 )
 
 func main() {
 	defer config.CloseDatabaseConnection(db)
 	r := gin.Default()
 
-	authRoutes := r.Group("users")
+	authRoutes := r.Group("auth")
 	{
 		authRoutes.POST("/login", authController.Login)
 		authRoutes.POST("/register", authController.Register)
 	}
 
-	autRoutes := r.Group("todos")
+	authRoutes = r.Group("user", middleware.AuthorizeJWT(jwtService))
 	{
-		autRoutes.GET("/", todoController.AllTodo)
-		autRoutes.GET("/:id", todoController.FindTodoById)
-		autRoutes.POST("/", todoController.InsertTodo)
-		autRoutes.PUT("/", todoController.UpdateTodo)
-		autRoutes.DELETE("/:id", todoController.DeleteTodo)
-	}
+		authRoutes.PUT("/", userController.UpdateUser)
+		authRoutes.GET("/:id", userController.ProfileUser)
 
-	authRoutes = r.Group("categories")
-	{
-		authRoutes.GET("/", categoryController.AllCategory)
-		authRoutes.GET("/:id", categoryController.FindCategoryById)
-		authRoutes.POST("/", categoryController.InsertCategory)
-		authRoutes.PUT("/", categoryController.UpdateCategory)
-		authRoutes.DELETE("/:id", categoryController.DeleteCategory)
-	}
+		autRoutes := r.Group("todos", middleware.AuthorizeJWT(jwtService))
+		{
+			autRoutes.GET("/", todoController.AllTodo)
+			autRoutes.GET("/:id", todoController.FindTodoById)
+			autRoutes.POST("/", todoController.InsertTodo)
+			autRoutes.PUT("/", todoController.UpdateTodo)
+			autRoutes.DELETE("/:id", todoController.DeleteTodo)
+		}
 
-	r.Run()
+		authRoutes = r.Group("categories", middleware.AuthorizeJWT(jwtService))
+		{
+			authRoutes.GET("/", categoryController.AllCategory)
+			authRoutes.GET("/:id", categoryController.FindCategoryById)
+			authRoutes.POST("/", categoryController.InsertCategory)
+			authRoutes.PUT("/", categoryController.UpdateCategory)
+			authRoutes.DELETE("/:id", categoryController.DeleteCategory)
+		}
+
+		r.Run()
+	}
 }
