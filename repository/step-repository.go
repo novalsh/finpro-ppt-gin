@@ -46,13 +46,13 @@ func (db *stepConnection) DeleteStepById(stepId uint64) error {
 }
 
 func (db *stepConnection) FindAllStep() []models.Step {
-	var step []models.Step
-	db.connection.Preload("TodoId").Find(&step)
-	return step
+	var steps []models.Step
+	db.connection.Preload("Todo").Find(&steps)
+	return steps
 }
 
 func (db *stepConnection) FindStepById(stepId uint64) models.Step {
 	var step models.Step
-	db.connection.Preload("TodoId").Find(&step, stepId)
+	db.connection.Preload("Todo").Find(&step, stepId)
 	return step
 }
