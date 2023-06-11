@@ -9,7 +9,7 @@ import (
 type StepRepository interface {
 	InsertStep(b models.Step) models.Step
 	UpdateStep(b models.Step) models.Step
-	DeleteStep(b models.Step)
+	DeleteStepById(stepID uint64) error
 	FindAllStep() []models.Step
 	FindStepById(stepId uint64) models.Step
 }
@@ -28,16 +28,21 @@ func (db *stepConnection) InsertStep(b models.Step) models.Step {
 	db.connection.Save(&b)
 	db.connection.Preload("TodoId").Find(&b)
 	return b
+
 }
 
 func (db *stepConnection) UpdateStep(b models.Step) models.Step {
 	db.connection.Save(&b)
-	db.connection.Preload("TodoId").Find(&b)
 	return b
 }
 
-func (db *stepConnection) DeleteStep(b models.Step) {
-	db.connection.Delete(&b)
+func (db *stepConnection) DeleteStepById(stepId uint64) error {
+	step := models.Step{}
+	result := db.connection.Delete(&step, stepId)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
 
 func (db *stepConnection) FindAllStep() []models.Step {

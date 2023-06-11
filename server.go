@@ -27,6 +27,7 @@ var (
 	todoController     controllers.TodoController     = controllers.NewTodoController(todoService)
 	categoryController controllers.CategoryController = controllers.NewCategoryController(categoryService, jwtService)
 	userController     controllers.UserController     = controllers.NewUserController(userService, jwtService)
+	stepController     controllers.StepController     = controllers.NewStepController(stepService)
 )
 
 func main() {
@@ -60,6 +61,15 @@ func main() {
 			authRoutes.POST("/", categoryController.InsertCategory)
 			authRoutes.PUT("/", categoryController.UpdateCategory)
 			authRoutes.DELETE("/:id", categoryController.DeleteCategory)
+		}
+
+		authRoutes = r.Group("steps", middleware.AuthorizeJWT(jwtService))
+		{
+			authRoutes.GET("/", stepController.FindAllStep)
+			authRoutes.GET("/:id", stepController.FindStepById)
+			authRoutes.POST("/", stepController.InsertStep)
+			authRoutes.PUT("/", stepController.UpdateStep)
+			authRoutes.DELETE("/:id", stepController.DeleteStep)
 		}
 
 		r.Run()
