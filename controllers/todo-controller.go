@@ -160,20 +160,22 @@ func (controller *todoController) KMeans(ctx *gin.Context) {
 	}
 
 	clusters := clusterItems(filteredTodos, centroids)
-	hasilClusters := make([]HasilCluster, 0)
+	hasilClusters := make(map[string][]map[string]interface{})
 
 	for i, cluster := range clusters {
+		clusterItems := make([]map[string]interface{}, 0)
 		fmt.Printf("Cluster %d:\n", i+1)
 		for _, item := range cluster.Items {
 			fmt.Printf("- %s (Deadline: %s, Level: %.2f)\n", item.Name, item.Deadline, item.Level)
 
-			hasilCluster := HasilCluster{
-				Name:     item.Name,
-				Deadline: item.Deadline,
-				Level:    item.Level,
+			clusterItem := map[string]interface{}{
+				"name":     item.Name,
+				"deadline": item.Deadline,
+				"level":    item.Level,
 			}
-			hasilClusters = append(hasilClusters, hasilCluster)
+			clusterItems = append(clusterItems, clusterItem)
 		}
+		hasilClusters[fmt.Sprintf("Cluster %d", i+1)] = clusterItems
 	}
 
 	ctx.JSON(http.StatusOK, hasilClusters)
