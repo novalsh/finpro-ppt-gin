@@ -11,7 +11,7 @@ type Todo struct {
 	Name       string    `gorm:"type:varchar(255):not null" json:"name"`
 	Note       string    `gorm:"type:varchar(255)" json:"note"`
 	Deadline   string    `gorm:"type:varchar(255):not null" json:"deadline"`
-	Level      string    `gorm:"type:varchar(255):not null" json:"level"`
+	Level      float64   `gorm:"type:varchar(255):not null" json:"level"`
 	Cluster    string    `gorm:"type:varchar(255)" json:"cluster"`
 	CreatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`

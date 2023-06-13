@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -16,6 +18,24 @@ type TodoController interface {
 	DeleteTodo(ctx *gin.Context)
 	FindAllTodo(ctx *gin.Context)
 	FindTodoById(ctx *gin.Context)
+	KMeans(ctx *gin.Context)
+}
+
+type FilteredTodo struct {
+	Name     string  `json:"name"`
+	Deadline string  `json:"deadline"`
+	Level    float64 `json:"level"`
+}
+
+type Cluster struct {
+	Centroid FilteredTodo
+	Items    []FilteredTodo
+}
+
+type HasilCluster struct {
+	Name     string  `json:"name"`
+	Deadline string  `json:"deadline"`
+	Level    float64 `json:"level"`
 }
 
 type todoController struct {
@@ -98,4 +118,119 @@ func (controller *todoController) FindTodoById(ctx *gin.Context) {
 	todo := controller.todoService.FindTodoById(TodoId)
 
 	ctx.JSON(http.StatusOK, gin.H{"todo": todo})
+}
+
+func (controller *todoController) KMeans(ctx *gin.Context) {
+	// Panggil service untuk mendapatkan daftar semua todo
+	todos := controller.todoService.KMeans()
+
+	// Buat slice untuk menyimpan todos yang telah difilter
+	filteredTodos := make([]FilteredTodo, 0)
+
+	// Loop melalui todos dan filter berdasarkan name, deadline, dan level
+	for _, todo := range todos {
+		filteredTodo := FilteredTodo{
+			Name:     todo.Name,
+			Deadline: todo.Deadline,
+			Level:    todo.Level,
+		}
+
+		filteredTodos = append(filteredTodos, filteredTodo)
+	}
+
+	//clustering menggunakan kmeans
+	k := 2
+
+	centroids := initializeCentroids(filteredTodos, k)
+
+	for {
+		// Melakukan clustering pada data items
+		clusters := clusterItems(filteredTodos, centroids)
+
+		// Menghitung centroid baru berdasarkan rata-rata items pada setiap cluster
+		newCentroids := calculateNewCentroids(clusters)
+
+		// Memeriksa apakah centroid sudah konvergen (tidak berubah)
+		if centroidsConverged(centroids, newCentroids) {
+			break
+		}
+
+		// Mengupdate centroid dengan yang baru
+		centroids = newCentroids
+	}
+
+	clusters := clusterItems(filteredTodos, centroids)
+	hasilClusters := make([]HasilCluster, 0)
+
+	for i, cluster := range clusters {
+		fmt.Printf("Cluster %d:\n", i+1)
+		for _, item := range cluster.Items {
+			fmt.Printf("- %s (Deadline: %s, Level: %.2f)\n", item.Name, item.Deadline, item.Level)
+
+			hasilCluster := HasilCluster{
+				Name:     item.Name,
+				Deadline: item.Deadline,
+				Level:    item.Level,
+			}
+			hasilClusters = append(hasilClusters, hasilCluster)
+		}
+	}
+
+	ctx.JSON(http.StatusOK, hasilClusters)
+}
+
+func initializeCentroids(items []FilteredTodo, k int) []FilteredTodo {
+	centroids := make([]FilteredTodo, k)
+	for i := 0; i < k; i++ {
+		centroids[i] = items[i]
+	}
+	return centroids
+
+}
+
+func clusterItems(items []FilteredTodo, centroids []FilteredTodo) []Cluster {
+	clusters := make([]Cluster, len(centroids))
+	for _, item := range items {
+		minDistance := math.MaxFloat64
+		clusterIndex := 0
+		for i, centroid := range centroids {
+			distance := euclideanDistance(item, centroid)
+			if distance < minDistance {
+				minDistance = distance
+				clusterIndex = i
+			}
+		}
+		clusters[clusterIndex].Items = append(clusters[clusterIndex].Items, item)
+	}
+	return clusters
+}
+
+func euclideanDistance(item1, item2 FilteredTodo) float64 {
+	return math.Sqrt(math.Pow(item1.Level-item2.Level, 2))
+}
+
+func calculateNewCentroids(clusters []Cluster) []FilteredTodo {
+	newCentroids := make([]FilteredTodo, len(clusters))
+	for i, cluster := range clusters {
+		var sumLevel float64
+		for _, item := range cluster.Items {
+			sumLevel += item.Level
+		}
+		centroid := FilteredTodo{
+			Name:     fmt.Sprintf("Centroid %d", i+1),
+			Deadline: cluster.Centroid.Deadline,
+			Level:    sumLevel / float64(len(cluster.Items)),
+		}
+		newCentroids[i] = centroid
+	}
+	return newCentroids
+}
+
+func centroidsConverged(centroids, newCentroids []FilteredTodo) bool {
+	for i := range centroids {
+		if centroids[i].Level != newCentroids[i].Level {
+			return false
+		}
+	}
+	return true
 }

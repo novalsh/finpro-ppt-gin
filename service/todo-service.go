@@ -12,6 +12,7 @@ type TodoService interface {
 	DeleteTodoById(todoID uint64) error
 	FindAllTodo() []models.Todo
 	FindTodoById(todoID uint64) models.Todo
+	KMeans() []models.Todo
 }
 
 type todoService struct {
@@ -26,24 +27,24 @@ func NewTodoService(todoRepo repository.TodoRepository) TodoService {
 
 func (service *todoService) InsertTodo(b dto.TodoCreateDto) dto.TodoCreateDto {
 	todoToInsert := models.Todo{}
-	todoToInsert.UserId = uint64(b.UserId)
-	todoToInsert.CategoryId = uint64(b.CategoryId)
+	todoToInsert.UserId = b.UserId
+	todoToInsert.CategoryId = b.CategoryId
 	todoToInsert.Name = b.Name
 	todoToInsert.Note = b.Note
 	todoToInsert.Deadline = b.Deadline
 	todoToInsert.Level = b.Level
-	todoToInsert.Cluster = b.Cluster
+	// todoToInsert.Cluster = b.Cluster
 	todoInserted := service.todoRepository.InsertTodo(todoToInsert)
 
 	// Konversi nilai todoInserted menjadi dto.TodoCreateDto
 	insertedDto := dto.TodoCreateDto{
-		UserId:     uint64(todoInserted.UserId),
-		CategoryId: uint64(todoInserted.CategoryId),
+		UserId:     todoInserted.UserId,
+		CategoryId: todoInserted.CategoryId,
 		Name:       todoInserted.Name,
 		Note:       todoInserted.Note,
 		Deadline:   todoInserted.Deadline,
 		Level:      todoInserted.Level,
-		Cluster:    todoInserted.Cluster,
+		// Cluster:    todoInserted.Cluster,
 	}
 
 	return insertedDto
@@ -51,26 +52,26 @@ func (service *todoService) InsertTodo(b dto.TodoCreateDto) dto.TodoCreateDto {
 
 func (service *todoService) UpdateTodo(b dto.TodoUpdateDto) dto.TodoUpdateDto {
 	todoToUpdate := models.Todo{}
-	todoToUpdate.ID = uint64(b.Id)
-	todoToUpdate.UserId = uint64(b.UserId)
-	todoToUpdate.CategoryId = uint64(b.CategoryId)
+	todoToUpdate.ID = b.Id
+	todoToUpdate.UserId = b.UserId
+	todoToUpdate.CategoryId = b.CategoryId
 	todoToUpdate.Name = b.Name
 	todoToUpdate.Note = b.Note
 	todoToUpdate.Deadline = b.Deadline
 	todoToUpdate.Level = b.Level
-	todoToUpdate.Cluster = b.Cluster
+	// todoToUpdate.Cluster = b.Cluster
 	todoUpdated := service.todoRepository.UpdateTodo(todoToUpdate)
 
 	// Konversi nilai todoUpdated menjadi dto.TodoUpdateDto
 	updatedDto := dto.TodoUpdateDto{
-		Id:         uint64(todoUpdated.ID),
-		UserId:     uint64(todoUpdated.UserId),
-		CategoryId: uint64(todoUpdated.CategoryId),
+		Id:         todoUpdated.ID,
+		UserId:     todoUpdated.UserId,
+		CategoryId: todoUpdated.CategoryId,
 		Name:       todoUpdated.Name,
 		Note:       todoUpdated.Note,
 		Deadline:   todoUpdated.Deadline,
 		Level:      todoUpdated.Level,
-		Cluster:    todoUpdated.Cluster,
+		// Cluster:    todoUpdated.Cluster,
 	}
 
 	return updatedDto
@@ -90,4 +91,8 @@ func (service *todoService) FindAllTodo() []models.Todo {
 
 func (service *todoService) FindTodoById(todoID uint64) models.Todo {
 	return service.todoRepository.FindTodoById(todoID) // Mengambil todo berdasarkan ID
+}
+
+func (service *todoService) KMeans() []models.Todo {
+	return service.todoRepository.KMeans()
 }

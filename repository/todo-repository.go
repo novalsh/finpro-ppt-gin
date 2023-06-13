@@ -12,6 +12,7 @@ type TodoRepository interface {
 	DeleteTodoById(id uint64) error
 	FindAllTodo() []models.Todo
 	FindTodoById(todoId uint64) models.Todo
+	KMeans() []models.Todo
 }
 
 type todoConnection struct {
@@ -52,5 +53,11 @@ func (db *todoConnection) FindAllTodo() []models.Todo {
 func (db *todoConnection) FindTodoById(todoId uint64) models.Todo {
 	var todo models.Todo
 	db.connection.Preload("User").Preload("Category").Find(&todo, todoId)
+	return todo
+}
+
+func (db *todoConnection) KMeans() []models.Todo {
+	var todo []models.Todo
+	db.connection.Preload("User").Find(&todo)
 	return todo
 }

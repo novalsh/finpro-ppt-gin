@@ -51,7 +51,9 @@ func main() {
 			autRoutes.GET("/:id", todoController.FindTodoById)
 			autRoutes.POST("/", todoController.InsertTodo)
 			autRoutes.PUT("/", todoController.UpdateTodo)
+			autRoutes.GET("/kmeans", todoController.KMeans)
 			autRoutes.DELETE("/:id", todoController.DeleteTodo)
+
 		}
 
 		authRoutes = r.Group("categories", middleware.AuthorizeJWT(jwtService))
