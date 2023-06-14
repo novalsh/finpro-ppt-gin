@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -15,6 +16,7 @@ import (
 type AuthController interface {
 	Login(ctx *gin.Context)
 	Register(ctx *gin.Context)
+	Logout(ctx *gin.Context)
 }
 
 type authController struct {
@@ -67,4 +69,25 @@ func (c *authController) Register(ctx *gin.Context) {
 		response := helper.BuildResponse(true, "OK!", createdUser)
 		ctx.JSON(http.StatusCreated, response)
 	}
+}
+
+func (c *authController) Logout(ctx *gin.Context) {
+	// Extract the token from the request header or any other location
+	// For example, if the token is passed in the "Authorization" header as a Bearer token:
+	tokenString := ctx.GetHeader("Authorization")
+	// Remove the "Bearer " prefix from the token string
+	accessToken := strings.Replace(tokenString, "Bearer ", "", 1)
+
+	// Perform any necessary token validation or additional logic
+
+	// Assuming you have a method in your JWT service to validate and extract the user ID from the token
+	_, err := c.jwtService.ValidateToken(accessToken)
+	if err != nil {
+		response := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	// Return a success response
+	response := helper.BuildResponse(true, "Logout successful", helper.EmptyObj{})
+	ctx.JSON(http.StatusOK, response)
 }

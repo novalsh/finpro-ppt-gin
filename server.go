@@ -38,6 +38,7 @@ func main() {
 	{
 		authRoutes.POST("/login", authController.Login)
 		authRoutes.POST("/register", authController.Register)
+		authRoutes.POST("/logout", authController.Logout)
 	}
 
 	authRoutes = r.Group("user", middleware.AuthorizeJWT(jwtService))

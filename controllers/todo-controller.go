@@ -121,13 +121,10 @@ func (controller *todoController) FindTodoById(ctx *gin.Context) {
 }
 
 func (controller *todoController) KMeans(ctx *gin.Context) {
-	// Panggil service untuk mendapatkan daftar semua todo
 	todos := controller.todoService.KMeans()
 
-	// Buat slice untuk menyimpan todos yang telah difilter
 	filteredTodos := make([]FilteredTodo, 0)
 
-	// Loop melalui todos dan filter berdasarkan name, deadline, dan level
 	for _, todo := range todos {
 		filteredTodo := FilteredTodo{
 			Name:     todo.Name,
@@ -138,24 +135,18 @@ func (controller *todoController) KMeans(ctx *gin.Context) {
 		filteredTodos = append(filteredTodos, filteredTodo)
 	}
 
-	//clustering menggunakan kmeans
 	k := 2
 
 	centroids := initializeCentroids(filteredTodos, k)
 
 	for {
-		// Melakukan clustering pada data items
 		clusters := clusterItems(filteredTodos, centroids)
 
-		// Menghitung centroid baru berdasarkan rata-rata items pada setiap cluster
 		newCentroids := calculateNewCentroids(clusters)
 
-		// Memeriksa apakah centroid sudah konvergen (tidak berubah)
 		if centroidsConverged(centroids, newCentroids) {
 			break
 		}
-
-		// Mengupdate centroid dengan yang baru
 		centroids = newCentroids
 	}
 
